@@ -1,0 +1,67 @@
+{
+    "dataset_name": "market_features_sample",
+    "parent_ohlcv_dir": "data/processed_ohlcv/sample",
+    "asset_count": 5,
+    "asset_order": [
+        "AAPL",
+        "AMZN",
+        "GOOGL",
+        "MSFT",
+        "NVDA"
+    ],
+    "date_range": {
+        "start": "2018-11-01",
+        "end": "2025-12-31",
+        "total_trading_days": 1800,
+        "warmup_buffer_days": 40,
+        "effective_eval_days": 1760
+    },
+    "indicators": {
+        "RSI": {
+            "period": 14,
+            "smoothing": "Wilder",
+            "bounds": [
+                0,
+                100
+            ]
+        },
+        "MACD": {
+            "fast_period": 12,
+            "slow_period": 26,
+            "signal_period": 9
+        },
+        "ADX": {
+            "period": 14,
+            "components": [
+                "ADX",
+                "+DI",
+                "-DI"
+            ],
+            "bounds": [
+                0,
+                100
+            ]
+        },
+        "CCI": {
+            "period": 20,
+            "constant": 0.015,
+            "mad_scaling": true
+        },
+        "Rolling_Volatility": {
+            "window": 30,
+            "annualized": true,
+            "scale": "sqrt(252)"
+        },
+        "Ledoit_Wolf_Covariance": {
+            "window": 30,
+            "shrinkage": "analytical",
+            "target": "scaled_identity"
+        }
+    },
+    "state_representation_spec": {
+        "framework": "Gymnasium (Box space)",
+        "dimension_formula": "7 * N + 2",
+        "sample_dimension": 37,
+        "scaling_policy": "Normalized & bounded to [-5.0, 5.0]; fit strictly on training interval"
+    }
+}
