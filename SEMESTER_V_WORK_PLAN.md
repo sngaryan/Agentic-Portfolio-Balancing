@@ -43,7 +43,7 @@ Provide a documented, reproducible dataset that Persons 2 and 3 can use without 
 1. **Inventory existing project data**
    - Inspect `yfinance/`, `responses/`, and relevant result files.
    - Record the assets/tickers, date coverage, frequency, file formats, and columns in the existing data.
-   - Confirm whether the current files contain Open, High, Low, Close, and Volume (OHLCV), or only Close and derived returns, as described in the current code walkthrough.
+   - Confirm whether the current files contain Open, High, Low, Close, and Volume (OHLCV), or only Close and derived returns. The current `run.py` downloads `['Close']`, so the existing `yfinance/data_*.csv` files are not sufficient for ADX and CCI.
    - Note missing files, duplicate dates, missing observations, inconsistent ticker labels, and other quality issues.
    - Distinguish original downloaded data from derived returns, model responses, and generated portfolio outputs.
 
@@ -54,6 +54,7 @@ Provide a documented, reproducible dataset that Persons 2 and 3 can use without 
    - If the existing dataset is unsuitable, document the minimum additional data required before fetching or regenerating anything.
 
 3. **Prepare a repeatable pipeline**
+   - Add a repeatable daily OHLCV download/preparation step for the agreed universe (for example, a focused `src/data/` module if the team adopts that layout). First prove it works with a small ticker sample, then run it for the agreed universe and date range.
    - Load raw data, standardize column names and date representation, sort chronologically, and validate types.
    - Handle duplicate records and missing values using a documented rule; avoid silently filling data in ways that create artificial observations.
    - Align trading dates across assets and explain the chosen alignment policy.
@@ -65,7 +66,12 @@ Provide a documented, reproducible dataset that Persons 2 and 3 can use without 
    - Confirm these periods with Person 3 before baseline evaluation.
    - Provide Person 2 the prepared time series and date conventions before feature integration begins.
 
-5. **Write the data documentation**
+5. **Align the asset universe carefully**
+   - For reproducing the existing LLM-BLM outputs, align price/return columns, market-cap entries, and per-period LLM responses using an explicit common ticker list and stable ticker order.
+   - The current `responses/common_stocks.json` contains 497 entries; the current evaluation scripts then exclude `J` and `TSCO` and may drop more tickers due to missing values. Do not assume the list has 441 names or blindly hard-code a count.
+   - For a new evaluation period, define the universe before the experiment and ensure every baseline uses the same assets. If using a list of companies that survived across the full historical period, disclose the resulting survivorship-bias limitation; do not present it as a point-in-time S&P 500 universe.
+
+6. **Write the data documentation**
    - Describe the dataset, preprocessing decisions, exclusions, and known limitations.
    - Include a small validation summary: row/date coverage, number of assets, missing-value counts before and after cleaning, and OHLCV availability.
 
@@ -105,9 +111,9 @@ Deliver validated market features for Semester V and a precise interface specifi
    - Confirm with Person 3 which dates are used for training and evaluation so feature calculations respect the same boundaries.
 
 2. **Implement the required indicators**
-   - Compute MACD, RSI, ADX, and CCI using the prepared OHLCV series.
+   - Compute MACD, RSI, ADX, and CCI using the prepared OHLCV series. ADX and CCI require High and Low as well as Close; do not silently substitute Close-only approximations while still labeling them ADX/CCI.
    - Compute rolling volatility vectors using the documented 30-day window.
-   - Investigate a 30-day Ledoit-Wolf shrinkage risk estimate. Implement it if the selected assets and available data support it; otherwise provide the technical rationale and exact blocker.
+   - Investigate a 30-day Ledoit-Wolf shrinkage risk estimate. With a 30-observation window, the sample covariance rank is at most 29; it is therefore singular whenever the asset count exceeds 29. Shrinkage can improve conditioning, but it does not make a short window contain enough information to estimate all pairwise relationships accurately. Explain this distinction in the report/viva. The 497-name file in the current repository is a response-universe list, not a prescribed final asset count.
    - Record formulas or library conventions, parameter values, warm-up behavior, and output units for each feature.
 
 3. **Validate feature outputs**
@@ -162,14 +168,15 @@ Establish which existing portfolio results are reproducible, produce a fair base
    - Compare the written explanation with the implementation and note discrepancies rather than silently treating the explanation as proof.
 
 2. **Audit the saved portfolio outputs**
-   - Inspect `responses_portfolios/` and `results/` and classify generated files as equal-weight, MVO, LLM-BL, or evaluation output.
+   - Inspect `responses_portfolios/` and `results/` and classify generated files as equal-weight, MVO, LLM-BL, or evaluation output. Review `visualize_results.py` and `results/performance_comparison_metrics.csv` first; the local project already contains a comparison script and a metrics output, so do not rebuild them without identifying a gap.
    - Check whether the saved outputs match the dates and inputs expected by the scripts.
    - Preserve existing outputs and report any unexplained or stale files; do not overwrite project data as part of an audit.
+   - Specifically check that the training-return columns, forward-return columns, market-cap entries, and LLM-view tickers are intersected into the same ordered asset list before portfolio weights are calculated. The current scripts construct some of these lists separately, so a mismatch can cause missing-column errors or misaligned weights.
 
 3. **Set the comparison protocol with Person 1**
    - Agree on the common asset universe, date range, chronological split, return definition, and rebalance cadence.
    - Include equal-weight, Classical MVO, and the LLM-Enhanced Black-Litterman baseline where reproducible.
-   - Specify transaction-cost treatment. If costs are not implemented in an existing baseline, label results as gross of costs or add a clearly justified consistent cost calculation where feasible.
+   - Specify transaction-cost treatment. Existing return comparisons should be checked for costs; if they omit costs, label them gross of costs. If time permits, add one consistent turnover-based transaction-cost calculation and report the cost assumption explicitly. A 5–10 basis-point value is only a candidate assumption to justify or test, not automatically a realistic universal rate.
    - Keep the LLM-BL baseline at the fixed monthly rebalancing described in the SRS, and document the out-of-sample period chosen.
 
 4. **Reproduce and summarize results**
@@ -177,11 +184,13 @@ Establish which existing portfolio results are reproducible, produce a fair base
    - Record setup, inputs, settings, software assumptions, and any required model endpoint/API dependency.
    - If LLM prediction generation cannot run because credentials, endpoint configuration, or other dependencies are unavailable, do not fabricate results. Report which existing predictions can still be evaluated and what remains blocked.
    - Calculate or verify relevant metrics: cumulative/annualized return, volatility, Sharpe ratio, maximum drawdown, and turnover, where the data supports them.
+   - Audit the date loop before describing a December bug. The current baseline loop covers training months June–November 2024 and tests July–December 2024; it does not test December-trained weights in January 2025. That requires January 2025 forward returns, and should be described as missing evaluation data unless a genuine indexing defect is found.
    - Include metric definitions and state whether results include transaction costs.
 
 5. **Prepare the next-stage evaluation plan**
    - Specify how later PPO and SAC results should be compared against the same Classical MVO and LLM-BL baselines.
    - Record what must be held constant (assets, dates, transaction costs, and metrics) for a fair comparison.
+   - If the core reproduction is complete, run an optional Black–Litterman sensitivity analysis across documented `tau` values (for example 0.01, 0.025, 0.05, 0.1). Treat it as an extension, not a replacement for validating the existing baseline.
 
 ### Literature ownership for viva
 
@@ -204,6 +213,18 @@ Prepare a concise refresher on **portfolio optimization and the project's baseli
 - No market or model output is invented to fill gaps.
 
 ---
+
+## Execution setup before coding
+
+The team can begin the repository and code audit immediately. Before downloading the full dataset or reporting new comparison results, agree on these experiment settings together:
+
+- **Asset universe:** select a manageable, fixed set for the new OHLCV experiment. Keep it identical across strategies. Decide separately whether reproducing historic LLM-BLM outputs uses the legacy response ticker intersection.
+- **Date range and splits:** the SRS requires a 1–2 year out-of-sample period but does not set calendar dates. Choose training, validation, and test dates that support the rolling features and the selected evaluation period; confirm the dates with the supervisor if required. The previously suggested 2019–2025 range is only a proposal, not a project decision.
+- **Data contract:** daily OHLCV, date/ticker representation, return convention, missing-data rules, and raw/prepared output locations.
+- **Evaluation settings:** monthly rebalancing for the LLM-BL baseline, metrics, and whether results are gross or net of transaction costs. Any numerical cost assumption must be justified and recorded.
+- **Repository workflow:** use the same project repo with separate role branches if working on separate machines; avoid simultaneous edits to shared scripts and outputs. The current repo has local edits and generated files, so review and preserve them before the first shared push. Do not move the existing flat scripts into `src/` merely to match a proposed folder layout; agree on module boundaries first.
+
+**Ready-to-start work:** each owner may begin the non-dependent audit and documentation now. The full data download waits for the agreed asset/date configuration; final feature validation waits for the prepared data contract; final baseline metrics wait for the frozen dataset and shared evaluation settings.
 
 ## Checkpoints and inter-person handoffs
 
