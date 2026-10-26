@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / ambient files
+__pycache__/
+*.py[cod]
+*$py.class
+*.ipynb_checkpoints/
+.pytest_cache/
+
+# Large raw dataset panels (prevent bloating repository history)
+data/raw_ohlcv/raw_ohlcv_panel_legacy*.csv
+data/raw_ohlcv/raw_ohlcv_panel_custom*.csv
+data/raw_ohlcv/*prior*.csv
+data/raw_ohlcv/*legacy*.csv
+
+# Full-universe and custom processed output directories (keep sample validation outputs tracked)
+data/processed_ohlcv/legacy/
+data/processed_ohlcv/custom/
+
+# Python virtual environments & logs
+.venv/
+env/
+venv/
+*.log

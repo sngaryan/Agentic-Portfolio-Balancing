@@ -1,0 +1,20 @@
+{
+    "dataset_name": "ohlcv_dataset_sample",
+    "data_source": "Yahoo Finance (via yfinance library)",
+    "download_date": "2026-10-26",
+    "fields": [
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "returns"
+    ],
+    "asset_count": 5,
+    "asset_order": "Alphabetical (strictly sorted)",
+    "date_index_format": "YYYY-MM-DD (chronologically sorted)",
+    "price_adjustment": "auto_adjust=True (proportionally split- and dividend-adjusted OHLC)",
+    "warmup_policy": ">= 30 trading observations prior to 2019-01-01 strictly reserved for feature warm-up; never evaluated as training or testing period",
+    "leakage_safeguards": "Chronological partitioning enforced. Rolling indicators look backward only; no future period observations used in scaling. Static universe selection across historical periods inherits survivorship bias, which is documented as an academic research limitation.",
+    "legacy_isolation": "Legacy 2024 files in yfinance/ and responses/ preserved unchanged. Contract A (legacy 6-month baseline) and Contract B (multi-year OHLCV) are stored independently."
+}
