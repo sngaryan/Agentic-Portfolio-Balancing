@@ -1,0 +1,135 @@
+{
+    "execution_timestamp": "2026-10-26 21:55:18",
+    "library_versions": {
+        "python": "3.14.2",
+        "yfinance": "1.7.0",
+        "pandas": "2.3.3",
+        "numpy": "2.3.5"
+    },
+    "universe_mode": "sample",
+    "ticker_reconciliation": {
+        "requested_tickers_count": 5,
+        "requested_tickers": [
+            "AAPL",
+            "AMZN",
+            "GOOGL",
+            "MSFT",
+            "NVDA"
+        ],
+        "returned_columns_count": 5,
+        "returned_columns": [
+            "AAPL",
+            "AMZN",
+            "GOOGL",
+            "MSFT",
+            "NVDA"
+        ],
+        "unreturned_tickers_count": 0,
+        "unreturned_tickers_list": [],
+        "usable_tickers_count": 5,
+        "usable_tickers_list": [
+            "AAPL",
+            "AMZN",
+            "GOOGL",
+            "MSFT",
+            "NVDA"
+        ],
+        "full_history_count": 5,
+        "full_history_list": [
+            "AAPL",
+            "AMZN",
+            "GOOGL",
+            "MSFT",
+            "NVDA"
+        ],
+        "partial_history_count": 0,
+        "partial_history_list": [],
+        "zero_observations_count": 0,
+        "zero_observations_list": [],
+        "download_failures_count": 0,
+        "download_failures_list": []
+    },
+    "download_failures": {},
+    "zero_observation_tickers": {},
+    "partial_observation_tickers": {},
+    "total_trading_days": 1800,
+    "date_coverage": {
+        "requested_start_date": "2018-11-01",
+        "requested_end_date": "2025-12-31",
+        "actual_first_trading_day": "2018-11-01",
+        "actual_last_trading_day": "2025-12-31",
+        "target_final_session_included": true,
+        "end_date_verification_note": "Exact match: requested end date was an active market trading session and is included in the dataset.",
+        "warmup_observations_count": 40,
+        "warmup_start": "2018-11-01",
+        "warmup_end": "2018-12-31",
+        "training_period_days": 1008,
+        "validation_period_days": 250,
+        "testing_period_days": 502
+    },
+    "price_adjustment_policy": {
+        "auto_adjust": true,
+        "description": "auto_adjust=True scales Open, High, Low, and Close proportionally for splits and dividend distributions. Eliminates artificial return dislocations and maintains geometric consistency for technical indicator calculation (ADX, ATR, MACD)."
+    },
+    "per_field_missing_observation_counts": {
+        "open": 0,
+        "high": 0,
+        "low": 0,
+        "close": 0,
+        "volume": 0,
+        "returns": 0
+    },
+    "concrete_quality_checks": {
+        "duplicate_dates_passed": true,
+        "duplicate_dates_found": {},
+        "chronological_order_passed": true,
+        "chronological_order_by_field": {
+            "open": true,
+            "high": true,
+            "low": true,
+            "close": true,
+            "volume": true
+        },
+        "price_positivity_passed": true,
+        "price_positivity_details": {
+            "open": {
+                "passed": true,
+                "non_positive_count": 0
+            },
+            "high": {
+                "passed": true,
+                "non_positive_count": 0
+            },
+            "low": {
+                "passed": true,
+                "non_positive_count": 0
+            },
+            "close": {
+                "passed": true,
+                "non_positive_count": 0
+            }
+        },
+        "nonnegative_volume_passed": true,
+        "volume_validation": {
+            "negative_volume_count": 0,
+            "zero_volume_trading_days_count": 0
+        },
+        "ohlc_consistency_passed": true,
+        "ohlc_consistency_details": {
+            "high_less_than_low_count": 0,
+            "high_less_than_open_count": 0,
+            "high_less_than_close_count": 0,
+            "low_greater_than_open_count": 0,
+            "low_greater_than_close_count": 0
+        },
+        "common_date_index_passed": true,
+        "common_date_index_details": {
+            "open": true,
+            "high": true,
+            "low": true,
+            "close": true,
+            "volume": true,
+            "returns": true
+        }
+    }
+}
