@@ -1,5 +1,9 @@
 # Semester V Work Plan
 
+**Revision marker:** `2026-10-26 15:28:25 IST`
+
+**Plan status:** Proposed execution plan. The OHLCV date range and asset universe require team/supervisor confirmation.
+
 ## Purpose and scope
 
 This plan divides Semester V work for **Agentic AI for Financial Portfolio Balancing** among the three project members. [`PROJECT_EXPLANATION.md`](PROJECT_EXPLANATION.md) is the core description of the cloned LLM-BLM project and its current workflow. The revised SRS/SDS describes the larger intended system, including later reinforcement learning, explainability, API, database, and deployment work.
@@ -15,7 +19,7 @@ Semester V should establish a reliable research foundation: understand the clone
 | FR-03 Feature Construction | Construct and validate the specified market features where feasible. |
 | FR-04 State Representation | Specify the proposed state and its feature interface; full agent integration is later work. |
 | FR-09 Backtesting | Establish a reproducible baseline evaluation protocol and audit the existing backtest. |
-| FR-10 Baseline Evaluation | Reproduce or document MVO and LLM-enhanced Black-Litterman comparisons. PPO/SAC comparison follows in a later semester. |
+| FR-10 Baseline Evaluation | Reproduce MVO and LLM-enhanced Black-Litterman where data allows. The available monthly LLM-BL outputs support only the six-month legacy comparison; the SRS's 1–2-year LLM-BL evaluation remains a documented gap unless aligned views are obtained or the supervisor approves a scope change. PPO/SAC comparison follows in a later semester. |
 | FR-05–08, FR-11–14 | Record as future implementation requirements; do not let these displace the Semester V foundation unless the supervisor changes the scope. |
 
 The SRS/SDS is the target system specification, while `PROJECT_EXPLANATION.md` explains the existing LLM-BLM codebase. Treat the latter as the project's core account of the clone, but verify every implementation claim against the scripts and saved data before reporting it as a result.
@@ -52,6 +56,7 @@ Provide a documented, reproducible dataset that Persons 2 and 3 can use without 
    - Check that there are enough observations for the selected 30-day rolling features and chronological evaluation.
    - Record the data source, retrieval method/date where available, ticker symbols, currency/market, and known limitations.
    - If the existing dataset is unsuitable, document the minimum additional data required before fetching or regenerating anything.
+   - Maintain two separate data contracts: (A) preserve the legacy 2024 Close/return files used by the existing LLM-BLM reproduction, and (B) store the new multi-year daily OHLCV data for Semester V feature work and later RL work. Never overwrite the legacy files with the new dataset.
 
 3. **Prepare a repeatable pipeline**
    - Add a repeatable daily OHLCV download/preparation step for the agreed universe (for example, a focused `src/data/` module if the team adopts that layout). First prove it works with a small ticker sample, then run it for the agreed universe and date range.
@@ -60,6 +65,7 @@ Provide a documented, reproducible dataset that Persons 2 and 3 can use without 
    - Align trading dates across assets and explain the chosen alignment policy.
    - Generate returns consistently and preserve a clear separation between raw and processed inputs.
    - Save a configuration or concise run instructions so the same preparation can be repeated.
+   - Record the `yfinance` version and set price-adjustment behavior explicitly. Document how splits and dividends are reflected, and use a consistent price/return convention for indicators and portfolio evaluation.
 
 4. **Define chronological data periods**
    - Propose training, validation, and test intervals with no random shuffling across time.
@@ -68,8 +74,8 @@ Provide a documented, reproducible dataset that Persons 2 and 3 can use without 
 
 5. **Align the asset universe carefully**
    - For reproducing the existing LLM-BLM outputs, align price/return columns, market-cap entries, and per-period LLM responses using an explicit common ticker list and stable ticker order.
-   - The current `responses/common_stocks.json` contains 497 entries; the current evaluation scripts then exclude `J` and `TSCO` and may drop more tickers due to missing values. Do not assume the list  names or blindly hard-code a count.
-   - Audit `responses/get_common_stocks.py` before relying on it: it scans every JSON file in its working directory, including its own `common_stocks.json` output on a rerun. Restrict its inputs to the intended model-response files and exclude its output file.
+   - The current `responses/common_stocks.json` contains 497 entries; the current evaluation scripts then exclude `J` and `TSCO` and may drop more tickers due to missing values. Do not assume the list has 441 names or blindly hard-code a count.
+   - Audit `responses/get_common_stocks.py` before relying on it: it scans JSON files relative to the current working directory, not the script location. Running it from `responses/` includes its own `common_stocks.json` output on a rerun; running it from the repository root scans and writes in the wrong location. Resolve paths from the script location and restrict inputs to intended model-response files.
    - For a new evaluation period, define the universe before the experiment and ensure every baseline uses the same assets. If using a list of companies that survived across the full historical period, disclose the resulting survivorship-bias limitation; do not present it as a point-in-time S&P 500 universe.
 
 6. **Write the data documentation**
@@ -166,6 +172,7 @@ Establish which existing portfolio results are reproducible, produce a fair base
    - Use `PROJECT_EXPLANATION.md` as the conceptual guide.
    - Inspect `run.py`, `baselines.py`, `evaluate_multiple.py`, and `calculate_llm_returns.py` to verify the actual inputs, assumptions, date windows, and outputs.
    - Trace how returns, LLM views (`Q`), view uncertainty (`Omega`), market prior (`Pi`), posterior returns, and portfolio weights are represented in code and files.
+   - Check the as-of date and provenance of `market_caps.json`. If the same or current market caps are used for historical decisions, document that limitation and assess possible look-ahead bias.
    - Compare the written explanation with the implementation and note discrepancies rather than silently treating the explanation as proof.
 
 2. **Audit the saved portfolio outputs**
@@ -179,7 +186,7 @@ Establish which existing portfolio results are reproducible, produce a fair base
    - Include equal-weight, Classical MVO, and the LLM-Enhanced Black-Litterman baseline where reproducible.
    - Specify transaction-cost treatment. Existing return comparisons should be checked for costs; if they omit costs, label them gross of costs. If time permits, add one consistent turnover-based transaction-cost calculation and report the cost assumption explicitly. A 5–10 basis-point value is only a candidate assumption to justify or test, not automatically a realistic universal rate.
    - Keep the LLM-BL baseline at the fixed monthly rebalancing described in the SRS, and document the out-of-sample period chosen.
-   - Resolve the date-coverage mismatch before promising a long-period LLM-BL comparison: the saved LLM response files in this clone cover June–December 2024, while the SRS proposes 1–2 years out of sample. A longer OHLCV dataset alone does not extend LLM-BL results. Either obtain/generate aligned LLM views for the selected experiment period, or clearly label the legacy 2024 comparison as a short reproduction that does not meet the SRS's longer evaluation target.
+   - Resolve the date-coverage mismatch before promising a long-period LLM-BL comparison: the monthly response files used by the current monthly evaluation cover June–December 2024. Separate LLaMA/Qwen January–June 2024 aggregate files also exist; audit their structure before treating them as monthly views. A longer OHLCV dataset alone does not extend LLM-BL results. Either obtain aligned views for the full SRS period or label the legacy comparison as a short reproduction and get supervisor approval for the limitation.
 
 4. **Reproduce and summarize results**
    - Regenerate baseline results where the required data and configuration are available.
@@ -187,12 +194,12 @@ Establish which existing portfolio results are reproducible, produce a fair base
    - If LLM prediction generation cannot run because credentials, endpoint configuration, or other dependencies are unavailable, do not fabricate results. Report which existing predictions can still be evaluated and what remains blocked.
    - Calculate or verify relevant metrics: cumulative/annualized return, volatility, Sharpe ratio, maximum drawdown, and turnover, where the data supports them.
    - Audit the date loop before describing a December bug. The current baseline loop covers training months June–November 2024 and tests July–December 2024; it does not test December-trained weights in January 2025. That requires January 2025 forward returns, and should be described as missing evaluation data unless a genuine indexing defect is found.
-   - Include metric definitions and state whether results include transaction costs.
+   - Include metric definitions and state whether results include transaction costs. Check annualization and risk-free-rate units so daily and annual quantities are not mixed.
 
 5. **Prepare the next-stage evaluation plan**
    - Specify how later PPO and SAC results should be compared against the same Classical MVO and LLM-BL baselines.
    - Record what must be held constant (assets, dates, transaction costs, and metrics) for a fair comparison.
-   - If the core reproduction is complete, run an optional Black–Litterman sensitivity analysis across documented `tau` values (for example 0.01, 0.025, 0.05, 0.1). Treat it as an extension, not a replacement for validating the existing baseline.
+   - If the core reproduction is complete, run an optional Black–Litterman sensitivity analysis across documented `tau` values (for example 0.01, 0.025, 0.05, 0.1) using training/validation data. If values are also reported on the July–December 2024 comparison window, treat them as descriptive only; do not select a preferred `tau` based on test-period performance.
 
 ### Literature ownership for viva
 
@@ -221,11 +228,15 @@ Prepare a concise refresher on **portfolio optimization and the project's baseli
 The team can begin the repository and code audit immediately. Before downloading the full dataset or reporting new comparison results, agree on these experiment settings together:
 
 - **Asset universe:** select a manageable, fixed set for the new OHLCV experiment. Keep it identical across strategies. Decide separately whether reproducing historic LLM-BLM outputs uses the legacy response ticker intersection.
-- **Proposed date range and splits (to approve):** use daily data from **2019-01-01 through 2025-12-31**, with **2019–2022 for training**, **2023 for validation**, and **2024–2025 for the two-year out-of-sample test**. Also download at least 30 prior trading observations before 2019-01-01 for feature warm-up, but do not count that buffer as part of training or evaluation. This is a practical proposal matching the SRS's 1–2 year out-of-sample requirement; the team and supervisor must approve or replace it before the full download.
-- **Legacy LLM-BL coverage:** existing model responses only cover June–December 2024. The proposed 2024–2025 test period cannot be used for an LLM-BL comparison unless aligned LLM views are obtained/generated for the missing months. If that is not feasible this semester, report the legacy 2024 reproduction separately and state that it does not cover the full proposed test period.
+- **Proposed OHLCV data coverage and future split (to approve):** collect daily OHLCV from **2019-01-01 through 2025-12-31**, plus at least 30 prior trading observations for feature warm-up. For the later full-system experiment, a proposed chronological split is **2019–2022 training**, **2023 validation**, and **2024–2025 test**. This is a proposal, not an approved project decision.
+- **Semester V comparison window:** for the like-for-like legacy comparison, evaluate all strategies on the same six out-of-sample months, **July–December 2024**. The current monthly LLM-BL workflow uses June–November weights for those six return months. Do not describe this six-month comparison as meeting the SRS's 1–2 year LLM-BL evaluation target.
+- **Test-period discipline:** freeze asset selection, model settings, and metric conventions before examining test-period results. The 2019–2025 split is proposed for the later full-system experiment; the Semester V six-month comparison is a legacy reproduction and must not be used to tune settings for the proposed 2024–2025 test.
+- **Legacy LLM-BL coverage:** monthly response files used by the current evaluation cover June–December 2024. Separate LLaMA/Qwen January–June 2024 aggregate response files also exist, but must be audited before treating them as usable monthly views. No paid inference is planned. If a full-period LLM-BL comparison is required by the SRS, ask the supervisor whether local inference is feasible or approve the short legacy comparison as a Semester V limitation.
 - **Data contract:** daily OHLCV, date/ticker representation, return convention, missing-data rules, and raw/prepared output locations.
 - **Evaluation settings:** monthly rebalancing for the LLM-BL baseline, metrics, and whether results are gross or net of transaction costs. Any numerical cost assumption must be justified and recorded.
-- **Repository workflow:** use the same project repo with separate role branches if working on separate machines; avoid simultaneous edits to shared scripts and outputs. The current repo has local edits and generated files, so review and preserve them before the first shared push. Do not move the existing flat scripts into `src/` merely to match a proposed folder layout; agree on module boundaries first.
+- **Budget constraint:** do not use paid APIs for Semester V. Start with saved response files. A local open-weight model may be assessed in a small feasibility pilot only; label its results as a different model setup, not a reproduction of the saved LLM-BL baseline.
+- **Repository workflow:** publish this approved plan before implementation. Each contributor should work from a role branch based on the commit containing this plan; update already-created branches from that commit. Avoid simultaneous edits to shared scripts and outputs. Review `git status` before each push and preserve existing changes. Do not move the existing flat scripts into `src/` merely to match a proposed folder layout; agree on module boundaries first.
+- **Reference access:** ensure all contributors can access the revised SRS/SDS as well as `PROJECT_EXPLANATION.md`. If the GitHub repository is public, do not add a version containing personal identifiers unless the team has decided that is appropriate; share it separately or use a redacted copy.
 
 **Ready-to-start work:** each owner may begin the non-dependent audit and documentation now. The full data download waits for the agreed asset/date configuration; final feature validation waits for the prepared data contract; final baseline metrics wait for the frozen dataset and shared evaluation settings.
 
