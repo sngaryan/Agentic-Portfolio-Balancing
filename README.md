@@ -81,18 +81,12 @@ The evaluation process is split into two main components:
 
 ## Usage
 
-1. Run LLM predictions:
-```bash
-python run.py --model_name [qwen|llama|gemma|gpt]
-```
 
-2. Generate baseline portfolios:
 ```bash
-python baselines.py
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python src/data/ohlcv_pipeline.py --universe sample
+python generate_features.py
+python validate_features.py
 ```
-
-3. Calculate returns and evaluate strategies:
-```bash
-python calculate_llm_returns.py
-python evaluate_multiple.py
-``` 
