@@ -22,62 +22,44 @@ This is a student research project built on the LLM-BLM repository. It preserves
 
 ```
 .
-├── run.py                  # Main file to run LLMs and collect their views
-├── baselines.py           # Implementation of baseline portfolio strategies
-├── calculate_llm_returns.py # Calculates returns for LLM-based portfolios
-├── evaluate_multiple.py    # Evaluates multiple portfolio strategies
-├── responses/             # Stores LLM predictions and views
-├── responses_portfolios/  # Contains baseline portfolio weights and returns
-├── results/              # Final evaluation results
-└── yfinance/             # Downloaded stock price data
+├── src/                 # Data, features, and evaluation code
+├── data/                # OHLCV samples and feature outputs
+├── responses/           # Saved LLM responses
+├── responses_portfolios/
+├── results/
+├── yfinance/            # Original market data
+├── figure/              # Project plots
+└── docs/                # Reports and project documentation
 ```
 
 ## Workflow Description
 
-### 1. Data Collection and LLM Views (`run.py`)
-- Downloads S&P 500 stock price data using yfinance API
-- Data is stored in the `yfinance/` directory
-- Queries different LLM models (Qwen, LLaMA, Gemma, GPT) for stock return predictions
-- LLM responses are stored in `responses/` directory as JSON files
+1. **Prepare market data:** The OHLCV pipeline downloads and checks daily price and volume data. It has been validated on a five-stock sample; the final full universe is not yet selected.
+2. **Build features and state:** The feature code calculates technical indicators and risk estimates. The state interface organizes these values for a future portfolio agent; it is not yet connected to a trained agent.
+3. **Compare existing strategies:** The repository contains Equal Weight, MVO, and LLM-BLM baselines using saved LLM responses. The current comparison covers six months in 2024; its results are preliminary and the turnover/cost evaluation needs correction.
+4. **Future work:** Train a PPO or SAC portfolio agent and add XAI explanations. These components are not implemented yet.
 
-### 2. Baseline Portfolio Construction (`baselines.py`)
-- Implements two baseline portfolio strategies:
-  1. Equal-weighted portfolio
-  2. Mean-variance optimized portfolio
-- Processes data monthly from June 2024 to February 2025
-- Portfolio weights and returns are stored in `responses_portfolios/`
+![model](docs/figures/visual-2.png)
 
-### 3. Portfolio Evaluation
-The evaluation process is split into two main components:
-
-#### a. LLM Returns Calculation (`calculate_llm_returns.py`)
-- Processes the LLM-based portfolio weights
-- Calculates portfolio returns for each LLM strategy
-- Results are stored in `results/` directory
-
-#### b. Multiple Strategy Evaluation (`evaluate_multiple.py`)
-- Implements Black-Litterman portfolio optimization using LLM views
-- Processes multiple time periods
-- Generates final performance metrics and comparisons
-- Stores final evaluation results in `results/` directory
-
-![model](figure/cumulative_returns2.png)
-![model](figure/boxplot_all2.png)
-![model](figure/compare_weight2.png)
+No new LLM responses are required for the existing saved-response comparison.
 
 ## File Descriptions
 
 ### Main Files
-- `run.py`: Main entry point for collecting LLM views on stock returns
-- `baselines.py`: Implements baseline portfolio construction strategies
-- `calculate_llm_returns.py`: Calculates returns for LLM-based portfolios
-- `evaluate_multiple.py`: Evaluates and compares different portfolio strategies
+- `run.py`: Generates LLM views for stock returns. New views require a configured LLM endpoint.
+- `baselines.py`: Builds equal-weight and mean-variance portfolio baselines.
+- `evaluate_multiple.py`: Applies Black–Litterman using saved LLM views and compares portfolios.
+- `calculate_llm_returns.py`: Calculates returns for LLM-based portfolios.
+- `src/data/ohlcv_pipeline.py`: Downloads and prepares OHLCV market data.
+- `generate_features.py`: Calculates technical indicators and risk features.
+- `validate_features.py`: Validates the generated features.
 
 ### Directories
-- `responses/`: Contains JSON files with LLM predictions for each stock
-- `responses_portfolios/`: Stores baseline portfolio weights and returns
-- `results/`: Contains final evaluation results and performance metrics
-- `yfinance/`: Stores downloaded stock price data and returns
+- `responses/`: Saved LLM views from the existing July–December 2024 experiment.
+- `responses_portfolios/`: Portfolio weights and returns.
+- `results/`: Evaluation outputs and performance metrics.
+- `yfinance/`: Legacy price and return data used by the original workflow.
+- `docs/figures/`: Project diagrams and evaluation visuals.
 
 ## Usage
 
@@ -90,3 +72,4 @@ python src/data/ohlcv_pipeline.py --universe sample
 python generate_features.py
 python validate_features.py
 ```
+The existing LLM-BLM evaluation uses saved views in responses/. Generating new LLM views with run.py requires a configured model endpoint and credentials.
