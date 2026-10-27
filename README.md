@@ -13,7 +13,7 @@ This is a student research project built on the LLM-BLM repository. It preserves
 | Full-universe data run | Not completed; the final asset list is not selected |
 | PPO/SAC agent and integrated XAI | Future work; not implemented |
 
-![model](figure/model.png)
+![model](docs/figures/visual-1.png)
 
 
 
