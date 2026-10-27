@@ -1,6 +1,17 @@
-# Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model 
+# Agentic AI for Financial Portfolio Balancing
 
- > This is an official implementation of the paper [Integrating LLM-Generated Views into Mean-Variance Optimization Using the Black-Litterman Model](https://arxiv.org/abs/2504.14345), presented at ICLR 2025 Workshop on Advances in Financial AI.
+This is a student research project built on the LLM-BLM repository. It preserves the original saved LLM-BLM responses and baseline code, and adds a Semester V data pipeline, technical indicators, a portfolio-state interface, and baseline evaluation audits.
+
+## Current Status
+
+| Area | Status |
+|---|---|
+| OHLCV data pipeline | Implemented and checked on a five-stock sample |
+| Technical indicators and risk features | Implemented and checked on the five-stock sample |
+| Portfolio state interface | Specified; not connected to a trained agent |
+| Saved LLM-BLM comparison | Existing six-month results; preliminary and under audit |
+| Full-universe data run | Not completed; the final asset list is not selected |
+| PPO/SAC agent and integrated XAI | Future work; not implemented |
 
 ![model](figure/model.png)
 
